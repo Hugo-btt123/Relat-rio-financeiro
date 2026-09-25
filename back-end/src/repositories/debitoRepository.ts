@@ -18,3 +18,15 @@ export function criar(data: Prisma.DebitoCreateInput) {
 export function atualizar(id: number, data: Prisma.DebitoUpdateInput) {
   return prisma.debito.update({ where: { id }, data, include: COM_RELACOES })
 }
+
+export function buscarPorIds(ids: number[]) {
+  return prisma.debito.findMany({ where: { id: { in: ids } } })
+}
+
+export function atualizarMuitos(ids: number[], data: Prisma.DebitoUncheckedUpdateManyInput) {
+  return prisma.debito.updateMany({ where: { id: { in: ids } }, data })
+}
+
+export function atualizarMuitosPorNotinha(notinhaId: number, data: Prisma.DebitoUncheckedUpdateManyInput) {
+  return prisma.debito.updateMany({ where: { notinhaId, status: { not: 'cancelado' } }, data })
+}
