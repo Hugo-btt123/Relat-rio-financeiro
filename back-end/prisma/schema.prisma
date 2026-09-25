@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Papel {
+  administrador
+  funcionario
+}
+
+enum StatusDebito {
+  aberto
+  cobrado
+  pago
+  cancelado
+}
+
+enum StatusNotinha {
+  ativa
+  paga
+  estornada
+}
+
+model Usuario {
+  id       Int      @id @default(autoincrement())
+  nome     String
+  login    String   @unique
+  senha    String
+  papel    Papel    @default(funcionario)
+  criadoEm DateTime @default(now())
+}
+
+model Cliente {
+  id                  Int           @id @default(autoincrement())
+  nome                String
+  cpf                 String?
+  telefone            String?
+  observacoes         String?
+  status              String        @default("ativo")
+  honorarioEscritorio Decimal       @default(0) @db.Decimal(12, 2)
+  criadoEm            DateTime      @default(now())
+  propriedades        Propriedade[]
+  debitos             Debito[]
+  notinhas            Notinha[]
+  historico           Historico[]
+}
+
+model Propriedade {
+  id        Int      @id @default(autoincrement())
+  clienteId Int
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  nome      String
+  documento String?
+  status    String   @default("ativo")
+  criadoEm  DateTime @default(now())
+  debitos   Debito[]
+}
+
+model Notinha {
+  id                 Int           @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente       @relation(fields: [clienteId], references: [id])
+  competencia        String
+  observacoes        String?
+  total              Decimal       @db.Decimal(12, 2)
+  status             StatusNotinha @default(ativa)
+  creditoAdiantado   Decimal       @default(0) @db.Decimal(12, 2)
+  creditoPixPendente Decimal       @default(0) @db.Decimal(12, 2)
+  criadoEm           DateTime      @default(now())
+  criadoPor          String?
+  debitos            Debito[]
+  pagamentos         Pagamento[]
+}
+
+model Debito {
+  id                 Int          @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente      @relation(fields: [clienteId], references: [id])
+  propriedadeId      Int?
+  propriedade        Propriedade? @relation(fields: [propriedadeId], references: [id])
+  descricao          String
+  valor              Decimal      @db.Decimal(12, 2)
+  competencia        String
+  observacao         String?
+  status             StatusDebito @default(aberto)
+  notinhaId          Int?
+  notinha            Notinha?     @relation(fields: [notinhaId], references: [id])
+  competenciaNotinha String?
+  pixPendente        Boolean      @default(false)
+  formaPagamento     String?
+  dataPagamento      DateTime?    @db.Date
+  obsPagamento       String?
+  criadoEm           DateTime     @default(now())
+  criadoPor          String?
+  atualizadoEm       DateTime     @updatedAt
+}
+
+model Pagamento {
+  id         Int       @id @default(autoincrement())
+  notinhaId  Int
+  notinha    Notinha   @relation(fields: [notinhaId], references: [id])
+  valor      Decimal   @db.Decimal(12, 2)
+  forma      String
+  data       DateTime? @db.Date
+  obs        String?
+  tipo       String
+  pix        Boolean   @default(false)
+  confirmado Boolean   @default(true)
+  criadoEm   DateTime  @default(now())
+}
+
+model Historico {
+  id            Int      @id @default(autoincrement())
+  quando        DateTime @default(now())
+  entidade      String
+  entidadeId    String?
+  entidadeLabel String?
+  acao          String
+  operador      String?
+  detalhes      String?
+  clienteId     Int?
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
+}
