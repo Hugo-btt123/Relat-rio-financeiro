@@ -75,3 +75,38 @@ export async function reabrir(req: Request, res: Response): Promise<void> {
   const notinha = await notinhaService.reabrir(id, body.motivo !== undefined ? String(body.motivo) : '', req.usuario!.nome)
   res.json(paraNotinhaPublica(notinha))
 }
+
+export async function pagarTotalDinheiro(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id)
+  const notinha = await notinhaService.pagarTotalDinheiro(id, req.usuario!.nome)
+  res.json(paraNotinhaPublica(notinha))
+}
+
+export async function pagarTotalPix(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id)
+  const body = (req.body ?? {}) as Record<string, unknown>
+  const notinha = await notinhaService.pagarTotalPix(id, body.obs !== undefined ? String(body.obs) : '', req.usuario!.nome)
+  res.json(paraNotinhaPublica(notinha))
+}
+
+export async function pagarParcial(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id)
+  const body = (req.body ?? {}) as Record<string, unknown>
+  const notinha = await notinhaService.pagarParcial(
+    id,
+    {
+      valor: Number(body.valor),
+      forma: body.forma !== undefined ? String(body.forma) : undefined,
+      data: body.data !== undefined ? String(body.data) : undefined,
+      obs: body.obs !== undefined ? String(body.obs) : undefined,
+    },
+    req.usuario!.nome,
+  )
+  res.json(paraNotinhaPublica(notinha))
+}
+
+export async function confirmarCreditoPix(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id)
+  const notinha = await notinhaService.confirmarCreditoPix(id, req.usuario!.nome)
+  res.json(paraNotinhaPublica(notinha))
+}

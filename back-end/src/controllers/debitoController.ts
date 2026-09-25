@@ -132,3 +132,8 @@ export async function alterarStatus(req: Request, res: Response): Promise<void> 
   )
   res.json(paraDebitoPublico(debito))
 }
+
+export async function listarPixPendentes(_req: Request, res: Response): Promise<void> {
+  const linhas = await debitoService.listarPixPendentes()
+  res.json(linhas)
+}

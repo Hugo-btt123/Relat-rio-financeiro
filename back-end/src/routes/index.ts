@@ -4,6 +4,7 @@ import { clientesRouter } from './clientes.js'
 import { propriedadesRouter } from './propriedades.js'
 import { debitosRouter } from './debitos.js'
 import { notinhasRouter } from './notinhas.js'
+import { pixPendentesRouter } from './pixPendentes.js'
 import { exigirLogin } from '../middlewares/auth.js'
 
 export const router = Router()
@@ -20,3 +21,4 @@ router.use('/clientes', clientesRouter)
 router.use('/propriedades', propriedadesRouter)
 router.use('/debitos', debitosRouter)
 router.use('/notinhas', notinhasRouter)
+router.use('/pix-pendentes', pixPendentesRouter)

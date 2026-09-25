@@ -1,5 +1,6 @@
 import * as debitoRepository from '../repositories/debitoRepository.js'
 import * as notinhaRepository from '../repositories/notinhaRepository.js'
+import * as pagamentoRepository from '../repositories/pagamentoRepository.js'
 import * as notinhaService from './notinhaService.js'
 import * as historicoService from './historicoService.js'
 import * as clienteService from './clienteService.js'
@@ -9,7 +10,7 @@ import { ConflictError } from '../errors/ConflictError.js'
 import { arredondar } from '../utils/dinheiro.js'
 import { competenciaValida } from '../utils/competencia.js'
 import type { Prisma } from '../../generated/prisma/client.js'
-import type { DebitoComRelacoes } from '../dto/debito/debitoDto.js'
+import { paraDebitoPublico, type DebitoComRelacoes } from '../dto/debito/debitoDto.js'
 
 const ROTULOS_STATUS_INTERNO: Record<string, string> = { aberto: 'Em aberto', cobrado: 'Cobrado', pago: 'Pago' }
 
@@ -430,4 +431,108 @@ export async function alterarStatus(id: number, alvo: StatusAlvo, opcoes: Altera
   }
 
   return atualizado
+}
+
+interface LinhaPixPendente {
+  tipo: 'debito' | 'notinha' | 'credito-notinha'
+  atualizadoEm: Date
+  [chave: string]: unknown
+}
+
+// Monta a lista da tela "Conferir Pix". Agrupa quando faz sentido: débito
+// avulso vira uma linha normal; se TODOS os itens de uma notinha estão com
+// Pix pendente, vira UMA linha (a notinha inteira); se só PARTE está
+// pendente, cada item aparece separado com a fração do total; e se sobrou
+// "crédito Pix" que não fechou nenhum item inteiro, isso é uma linha
+// PRÓPRIA, presa à notinha mas sem débito específico — processada num laço
+// separado de propósito (bug #5: sem isso, um Pix pequeno demais fica
+// invisível e nunca é confirmado).
+export async function listarPixPendentes() {
+  const pendentes = await debitoRepository.listar({ pixPendente: true })
+  const porNotinha = new Map<number, DebitoComRelacoes[]>()
+  const resultado: LinhaPixPendente[] = []
+
+  for (const d of pendentes) {
+    if (!d.notinhaId) {
+      resultado.push({ tipo: 'debito', ...paraDebitoPublico(d), atualizadoEm: d.atualizadoEm })
+      continue
+    }
+    if (!porNotinha.has(d.notinhaId)) porNotinha.set(d.notinhaId, [])
+    porNotinha.get(d.notinhaId)!.push(d)
+  }
+
+  for (const [notinhaId, itensPendentes] of porNotinha) {
+    const notinha = await notinhaRepository.buscarPorId(notinhaId)
+    if (!notinha) continue
+
+    const numeroStr = numeroNotinha(notinha.id)
+    const todosItensRelevantes = notinha.debitos.filter((d) => d.status !== 'cancelado')
+    const sobraAlgoForaDoPix = todosItensRelevantes.some((d) => d.status === 'cobrado' && !d.pixPendente)
+    const totalNotinha = Number(notinha.total)
+    const creditoPixPendente = Number(notinha.creditoPixPendente)
+    const totalPendenteAqui = arredondar(itensPendentes.reduce((s, d) => s + Number(d.valor), 0) + creditoPixPendente)
+
+    if (!sobraAlgoForaDoPix && creditoPixPendente === 0 && itensPendentes.length > 1) {
+      const atualizadoEm = itensPendentes.reduce(
+        (max, d) => (d.atualizadoEm.getTime() > max.getTime() ? d.atualizadoEm : max),
+        itensPendentes[0].atualizadoEm,
+      )
+      resultado.push({
+        tipo: 'notinha',
+        id: `notinha-${notinha.id}`,
+        notinhaId: notinha.id,
+        notinhaNumero: numeroStr,
+        clienteId: notinha.clienteId,
+        clienteNome: notinha.cliente.nome,
+        descricao: `Notinha inteira (${itensPendentes.length} ${itensPendentes.length === 1 ? 'item' : 'itens'})`,
+        valor: totalPendenteAqui,
+        totalNotinha,
+        obsPagamento: [...new Set(itensPendentes.map((d) => d.obsPagamento).filter(Boolean))].join(' · '),
+        atualizadoEm,
+        debitoIds: itensPendentes.map((d) => d.id),
+      })
+    } else {
+      for (const d of itensPendentes) {
+        resultado.push({
+          tipo: 'debito',
+          ...paraDebitoPublico(d),
+          notinhaNumero: numeroStr,
+          pixParcialDaNotinha: true,
+          totalNotinha,
+          totalPendenteNotinha: totalPendenteAqui,
+          atualizadoEm: d.atualizadoEm,
+        })
+      }
+    }
+  }
+
+  const notinhasComCreditoPendente = await notinhaRepository.listar({ creditoPixPendente: { gt: 0 } })
+  for (const notinha of notinhasComCreditoPendente) {
+    const numeroStr = numeroNotinha(notinha.id)
+    const itensPendentes = porNotinha.get(notinha.id) ?? []
+    const creditoPixPendente = Number(notinha.creditoPixPendente)
+    const totalPendenteAqui = arredondar(itensPendentes.reduce((s, d) => s + Number(d.valor), 0) + creditoPixPendente)
+
+    const pagamentosPix = await pagamentoRepository.listarPixPorNotinha(notinha.id)
+    const atualizadoEm = pagamentosPix.reduce(
+      (maisRecente, p) => (p.criadoEm.getTime() > maisRecente.getTime() ? p.criadoEm : maisRecente),
+      pagamentosPix.length > 0 ? pagamentosPix[0].criadoEm : notinha.criadoEm,
+    )
+
+    resultado.push({
+      tipo: 'credito-notinha',
+      id: `credito-${notinha.id}`,
+      notinhaId: notinha.id,
+      notinhaNumero: numeroStr,
+      clienteId: notinha.clienteId,
+      clienteNome: notinha.cliente.nome,
+      descricao: 'Pagamento parcial via Pix (não fechou nenhum item inteiro)',
+      valor: creditoPixPendente,
+      totalNotinha: Number(notinha.total),
+      totalPendenteNotinha: totalPendenteAqui,
+      atualizadoEm,
+    })
+  }
+
+  return resultado.sort((a, b) => b.atualizadoEm.getTime() - a.atualizadoEm.getTime())
 }
