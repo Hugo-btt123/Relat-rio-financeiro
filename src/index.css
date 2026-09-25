@@ -1,0 +1,730 @@
+/* ==========================================================================
+   CREDIÁRIO DIGITAL — estilos globais
+   --------------------------------------------------------------------------
+   Identidade visual: "livro-caixa digital". A ideia é que o contador sinta
+   que está usando uma versão digital do caderno dele — por isso o fundo
+   claro, as linhas horizontais discretas nas tabelas, os números alinhados
+   e a tipografia serifada nos títulos (remetendo a documentos contábeis
+   impressos). Paleta pedida pelo cliente: branco, azul e dourado.
+   ========================================================================== */
+
+:root {
+  /* --- Cores principais --- */
+  --cd-branco: #ffffff;
+  --cd-papel: #fbfaf7; /* fundo levemente amarelado, como papel */
+  --cd-papel-forte: #f3f1ea;
+
+  --cd-azul-950: #0a1f3d;
+  --cd-azul-900: #0f2c52;
+  --cd-azul-800: #163d6d;
+  --cd-azul-600: #1f5490;
+  --cd-azul-400: #3f78bb;
+  --cd-azul-100: #e8eef7;
+  --cd-azul-50: #f3f6fb;
+
+  --cd-dourado-700: #9c7a2a;
+  --cd-dourado-500: #bd9440;
+  --cd-dourado-300: #d9bd77;
+  --cd-dourado-100: #f4ead0;
+
+  --cd-texto: #1c2430;
+  --cd-texto-suave: #5c6675;
+  --cd-texto-fraco: #8992a0;
+  --cd-borda: #e2e2da;
+  --cd-borda-forte: #c9c9be;
+
+  --cd-verde: #1f7a4d;
+  --cd-verde-bg: #e6f3ec;
+  --cd-laranja: #a5620f;
+  --cd-laranja-bg: #fbeed9;
+  --cd-vermelho: #a3291f;
+  --cd-vermelho-bg: #f8e6e4;
+  --cd-azul-info: #1f5490;
+  --cd-azul-info-bg: #e8eef7;
+
+  --cd-sombra: 0 1px 2px rgba(15, 44, 82, 0.06), 0 4px 14px rgba(15, 44, 82, 0.06);
+  --cd-raio: 10px;
+
+  --fonte-titulo: 'Source Serif 4', Georgia, serif;
+  --fonte-base: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte-base);
+  background: var(--cd-papel);
+  color: var(--cd-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  color: var(--cd-azul-950);
+  margin: 0;
+}
+
+a {
+  color: var(--cd-azul-600);
+}
+
+/* Números tabulares: alinhamento perfeito de valores monetários nas tabelas */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* --------------------------------------------------------------------------
+   Layout geral (sidebar + conteúdo)
+   -------------------------------------------------------------------------- */
+.cd-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.cd-sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--cd-azul-950), var(--cd-azul-900));
+  color: #dce6f4;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.cd-sidebar__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cd-sidebar__marca-icone {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--cd-dourado-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cd-azul-950);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.cd-sidebar__marca-icone img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cd-sidebar__marca-texto {
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.cd-sidebar__marca-sub {
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cd-sidebar nav {
+  padding: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cd-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: rgba(220, 230, 244, 0.85);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cd-sidebar__link i {
+  font-size: 16px;
+  width: 18px;
+  text-align: center;
+}
+
+.cd-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.cd-sidebar__link.ativo {
+  background: var(--cd-dourado-500);
+  color: var(--cd-azul-950);
+  font-weight: 600;
+}
+
+.cd-sidebar__rodape {
+  padding: 12px 16px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cd-conteudo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cd-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 28px;
+  background: var(--cd-branco);
+  border-bottom: 1px solid var(--cd-borda);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.cd-topbar__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cd-azul-950);
+}
+
+.cd-topbar__usuario {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13.5px;
+  color: var(--cd-texto-suave);
+}
+
+.cd-pagina {
+  padding: 26px 28px 60px;
+  max-width: 1320px;
+  width: 100%;
+}
+
+.cd-pagina__cabecalho {
+  margin-bottom: 20px;
+}
+
+.cd-pagina__subtitulo {
+  color: var(--cd-texto-suave);
+  font-size: 13.5px;
+  margin-top: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Cartões / superfícies
+   -------------------------------------------------------------------------- */
+.cd-card {
+  background: var(--cd-branco);
+  border: 1px solid var(--cd-borda);
+  border-radius: var(--cd-raio);
+  box-shadow: var(--cd-sombra);
+}
+
+.cd-card__corpo {
+  padding: 18px 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Tabela estilo "livro-caixa": linhas horizontais discretas, sem zebra
+   -------------------------------------------------------------------------- */
+.cd-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.cd-tabela thead th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--cd-texto-suave);
+  padding: 8px 12px;
+  border-bottom: 1.5px solid var(--cd-borda-forte);
+  white-space: nowrap;
+}
+
+.cd-tabela tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cd-borda);
+  vertical-align: middle;
+  color: var(--cd-texto);
+}
+
+.cd-tabela tbody tr:hover {
+  background: var(--cd-azul-50);
+}
+
+.cd-tabela tbody tr.linha-cancelada {
+  opacity: 0.55;
+}
+
+.cd-tabela tbody tr.linha-cancelada td {
+  text-decoration: line-through;
+}
+
+/* --------------------------------------------------------------------------
+   Badges de status
+   -------------------------------------------------------------------------- */
+.cd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cd-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cd-badge--aberto { background: var(--cd-laranja-bg); color: var(--cd-laranja); }
+.cd-badge--cobrado { background: var(--cd-azul-info-bg); color: var(--cd-azul-info); }
+.cd-badge--pago { background: var(--cd-verde-bg); color: var(--cd-verde); }
+.cd-badge--cancelado { background: var(--cd-vermelho-bg); color: var(--cd-vermelho); }
+.cd-badge--pix { background: var(--cd-dourado-100); color: var(--cd-dourado-700); }
+.cd-badge--neutro { background: #eef0f2; color: var(--cd-texto-suave); }
+
+/* --------------------------------------------------------------------------
+   Formulários
+   -------------------------------------------------------------------------- */
+.cd-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cd-texto-suave);
+  margin-bottom: 4px;
+}
+
+.form-control,
+.form-select {
+  border-color: var(--cd-borda-forte);
+  font-size: 13.5px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--cd-azul-400);
+  box-shadow: 0 0 0 3px var(--cd-azul-100);
+}
+
+.btn-cd-primario {
+  background: var(--cd-azul-900);
+  border: 1px solid var(--cd-azul-900);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.btn-cd-primario:hover {
+  background: var(--cd-azul-800);
+  border-color: var(--cd-azul-800);
+  color: #fff;
+}
+
+.btn-cd-ouro {
+  background: var(--cd-dourado-500);
+  border: 1px solid var(--cd-dourado-500);
+  color: var(--cd-azul-950);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.btn-cd-ouro:hover {
+  background: var(--cd-dourado-700);
+  border-color: var(--cd-dourado-700);
+  color: #fff;
+}
+
+.btn-cd-perigo {
+  background: var(--cd-vermelho);
+  border: 1px solid var(--cd-vermelho);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.btn-cd-perigo:hover {
+  background: #8a231b;
+  border-color: #8a231b;
+  color: #fff;
+}
+
+.btn-cd-secundario {
+  background: #fff;
+  border: 1px solid var(--cd-borda-forte);
+  color: var(--cd-texto);
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.btn-cd-secundario:hover {
+  background: var(--cd-azul-50);
+}
+
+.link-discreto {
+  color: var(--cd-azul-600);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-discreto:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Modal simples (feito à mão, sem depender do JS do Bootstrap)
+   -------------------------------------------------------------------------- */
+.cd-modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 40, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 5vh 16px;
+  z-index: 1050;
+  overflow-y: auto;
+}
+
+.cd-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(10, 20, 40, 0.35);
+  animation: cd-modal-entrar 0.14s ease-out;
+}
+
+@keyframes cd-modal-entrar {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cd-modal__cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--cd-borda);
+}
+
+.cd-modal__corpo {
+  padding: 18px 20px;
+}
+
+.cd-modal__rodape {
+  padding: 14px 20px 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid var(--cd-borda);
+}
+
+.cd-fechar {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--cd-texto-fraco);
+  cursor: pointer;
+}
+.cd-fechar:hover { color: var(--cd-texto); }
+
+/* --------------------------------------------------------------------------
+   Dropdown de ações (menu "...") — feito à mão
+   -------------------------------------------------------------------------- */
+.cd-acoes {
+  position: relative;
+  display: inline-block;
+}
+
+.cd-acoes__botao {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: var(--cd-texto-suave);
+  cursor: pointer;
+  font-size: 15px;
+}
+.cd-acoes__botao:hover {
+  background: var(--cd-azul-50);
+  border-color: var(--cd-borda);
+}
+
+.cd-acoes__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border: 1px solid var(--cd-borda);
+  border-radius: 8px;
+  box-shadow: var(--cd-sombra);
+  min-width: 210px;
+  z-index: 40;
+  padding: 6px;
+}
+
+.cd-acoes__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--cd-texto);
+  cursor: pointer;
+}
+.cd-acoes__item:hover {
+  background: var(--cd-azul-50);
+}
+.cd-acoes__item.perigo {
+  color: var(--cd-vermelho);
+}
+.cd-acoes__item.perigo:hover {
+  background: var(--cd-vermelho-bg);
+}
+.cd-acoes__item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cd-acoes__separador {
+  height: 1px;
+  background: var(--cd-borda);
+  margin: 5px 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Autocomplete de cliente
+   -------------------------------------------------------------------------- */
+.cd-autocomplete {
+  position: relative;
+}
+
+.cd-autocomplete__lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--cd-borda);
+  border-radius: 8px;
+  box-shadow: var(--cd-sombra);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.cd-autocomplete__item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--cd-borda);
+}
+.cd-autocomplete__item:last-child { border-bottom: none; }
+.cd-autocomplete__item:hover,
+.cd-autocomplete__item.destaque {
+  background: var(--cd-azul-50);
+}
+.cd-autocomplete__item small {
+  display: block;
+  color: var(--cd-texto-suave);
+}
+
+.cd-autocomplete__aviso {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--cd-laranja);
+  background: var(--cd-laranja-bg);
+  border-top: 1px solid var(--cd-borda);
+}
+
+/* --------------------------------------------------------------------------
+   Cartões de métrica (Dashboard)
+   -------------------------------------------------------------------------- */
+.cd-metrica {
+  background: #fff;
+  border: 1px solid var(--cd-borda);
+  border-radius: var(--cd-raio);
+  padding: 16px 18px;
+  box-shadow: var(--cd-sombra);
+}
+
+.cd-metrica__rotulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--cd-texto-suave);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cd-metrica__valor {
+  font-family: var(--fonte-titulo);
+  font-size: 27px;
+  font-weight: 600;
+  margin-top: 4px;
+  color: var(--cd-azul-950);
+}
+
+.cd-metrica__legenda {
+  font-size: 12px;
+  color: var(--cd-texto-fraco);
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Timeline (histórico estilo linha do tempo)
+   -------------------------------------------------------------------------- */
+.cd-linha-tempo {
+  position: relative;
+  padding-left: 22px;
+}
+
+.cd-linha-tempo::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  bottom: 4px;
+  width: 1.5px;
+  background: var(--cd-borda-forte);
+}
+
+.cd-linha-tempo__item {
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.cd-linha-tempo__ponto {
+  position: absolute;
+  left: -22px;
+  top: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--cd-azul-600);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--cd-borda-forte);
+}
+
+.cd-linha-tempo__item.pago .cd-linha-tempo__ponto { background: var(--cd-verde); }
+.cd-linha-tempo__item.cancelado .cd-linha-tempo__ponto { background: var(--cd-vermelho); }
+.cd-linha-tempo__item.pix .cd-linha-tempo__ponto { background: var(--cd-dourado-500); }
+
+/* --------------------------------------------------------------------------
+   Toasts (avisos rápidos no canto da tela)
+   -------------------------------------------------------------------------- */
+.cd-toasts {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2000;
+}
+
+.cd-toast {
+  background: var(--cd-azul-950);
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: cd-toast-entrar 0.15s ease-out;
+}
+
+.cd-toast.sucesso { background: var(--cd-verde); }
+.cd-toast.erro { background: var(--cd-vermelho); }
+.cd-toast.aviso { background: var(--cd-dourado-700); }
+
+@keyframes cd-toast-entrar {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   Utilidades
+   -------------------------------------------------------------------------- */
+.texto-suave { color: var(--cd-texto-suave); }
+.texto-fraco { color: var(--cd-texto-fraco); }
+.texto-riscado { text-decoration: line-through; color: var(--cd-texto-fraco); }
+.cd-vazio {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--cd-texto-fraco);
+  font-size: 13.5px;
+}
+.cd-chip-competencia {
+  font-family: var(--fonte-base);
+  font-size: 12px;
+  background: var(--cd-papel-forte);
+  border: 1px solid var(--cd-borda);
+  border-radius: 6px;
+  padding: 1px 7px;
+  color: var(--cd-texto-suave);
+}
+
+@media print {
+  .cd-sidebar, .cd-topbar, .nao-imprimir { display: none !important; }
+  .cd-pagina { padding: 0; max-width: 100%; }
+}
+
+@media (max-width: 900px) {
+  .cd-sidebar { width: 76px; }
+  .cd-sidebar__marca-texto, .cd-sidebar__marca-sub, .cd-sidebar__link span { display: none; }
+  .cd-sidebar__link { justify-content: center; }
+}
