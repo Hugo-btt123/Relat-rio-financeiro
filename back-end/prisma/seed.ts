@@ -10,18 +10,31 @@ const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const senhaHash = await bcrypt.hash("admin123", 10);
+  const senhaAdminHash = await bcrypt.hash("admin123", 10);
   await prisma.usuario.upsert({
     where: { login: "admin" },
     update: {},
     create: {
       nome: "Administrador",
       login: "admin",
-      senha: senhaHash,
+      senha: senhaAdminHash,
       papel: "administrador",
     },
   });
   console.log("Usuário admin criado/confirmado (login: admin / senha: admin123).");
+
+  const senhaFuncionarioHash = await bcrypt.hash("123456", 10);
+  await prisma.usuario.upsert({
+    where: { login: "funcionario" },
+    update: {},
+    create: {
+      nome: "Funcionário Teste",
+      login: "funcionario",
+      senha: senhaFuncionarioHash,
+      papel: "funcionario",
+    },
+  });
+  console.log("Usuário funcionario criado/confirmado (login: funcionario / senha: 123456).");
 }
 
 main()
