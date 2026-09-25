@@ -35,13 +35,16 @@ export async function criar(req: Request, res: Response): Promise<void> {
   const papel = papelDoUsuario(req)
   const body = (req.body ?? {}) as Record<string, unknown>
 
-  const cliente = await clienteService.criar({
-    nome: String(body.nome ?? ''),
-    cpf: body.cpf !== undefined ? String(body.cpf) : undefined,
-    telefone: body.telefone !== undefined ? String(body.telefone) : undefined,
-    observacoes: body.observacoes !== undefined ? String(body.observacoes) : undefined,
-    honorarioEscritorio: papel === 'administrador' && body.honorarioEscritorio !== undefined ? Number(body.honorarioEscritorio) : undefined,
-  })
+  const cliente = await clienteService.criar(
+    {
+      nome: String(body.nome ?? ''),
+      cpf: body.cpf !== undefined ? String(body.cpf) : undefined,
+      telefone: body.telefone !== undefined ? String(body.telefone) : undefined,
+      observacoes: body.observacoes !== undefined ? String(body.observacoes) : undefined,
+      honorarioEscritorio: papel === 'administrador' && body.honorarioEscritorio !== undefined ? Number(body.honorarioEscritorio) : undefined,
+    },
+    req.usuario!.nome,
+  )
   res.status(201).json(paraClientePublico(cliente, papel))
 }
 
@@ -50,14 +53,18 @@ export async function atualizar(req: Request, res: Response): Promise<void> {
   const id = parseId(req.params.id)
   const body = (req.body ?? {}) as Record<string, unknown>
 
-  const cliente = await clienteService.atualizar(id, {
-    nome: body.nome !== undefined ? String(body.nome) : undefined,
-    cpf: body.cpf !== undefined ? String(body.cpf) : undefined,
-    telefone: body.telefone !== undefined ? String(body.telefone) : undefined,
-    observacoes: body.observacoes !== undefined ? String(body.observacoes) : undefined,
-    status: body.status !== undefined ? String(body.status) : undefined,
-    honorarioEscritorio: papel === 'administrador' && body.honorarioEscritorio !== undefined ? Number(body.honorarioEscritorio) : undefined,
-  })
+  const cliente = await clienteService.atualizar(
+    id,
+    {
+      nome: body.nome !== undefined ? String(body.nome) : undefined,
+      cpf: body.cpf !== undefined ? String(body.cpf) : undefined,
+      telefone: body.telefone !== undefined ? String(body.telefone) : undefined,
+      observacoes: body.observacoes !== undefined ? String(body.observacoes) : undefined,
+      status: body.status !== undefined ? String(body.status) : undefined,
+      honorarioEscritorio: papel === 'administrador' && body.honorarioEscritorio !== undefined ? Number(body.honorarioEscritorio) : undefined,
+    },
+    req.usuario!.nome,
+  )
   res.json(paraClientePublico(cliente, papel))
 }
 
@@ -74,9 +81,13 @@ export async function criarPropriedade(req: Request, res: Response): Promise<voi
   await clienteService.buscarPorId(clienteId)
   const body = (req.body ?? {}) as Record<string, unknown>
 
-  const propriedade = await propriedadeService.criar(clienteId, {
-    nome: body.nome !== undefined ? String(body.nome) : undefined,
-    documento: body.documento !== undefined ? String(body.documento) : undefined,
-  })
+  const propriedade = await propriedadeService.criar(
+    clienteId,
+    {
+      nome: body.nome !== undefined ? String(body.nome) : undefined,
+      documento: body.documento !== undefined ? String(body.documento) : undefined,
+    },
+    req.usuario!.nome,
+  )
   res.status(201).json(propriedade)
 }

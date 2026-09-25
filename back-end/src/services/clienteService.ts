@@ -1,4 +1,5 @@
 import * as clienteRepository from '../repositories/clienteRepository.js'
+import * as historicoService from './historicoService.js'
 import { ValidationError } from '../errors/ValidationError.js'
 import { NotFoundError } from '../errors/NotFoundError.js'
 import { arredondar } from '../utils/dinheiro.js'
@@ -44,17 +45,26 @@ export interface CriarClienteInput {
   honorarioEscritorio?: number
 }
 
-export async function criar(input: CriarClienteInput) {
+export async function criar(input: CriarClienteInput, operador?: string) {
   if (!input.nome || !input.nome.trim()) {
     throw new ValidationError('O nome do cliente é obrigatório.')
   }
-  return clienteRepository.criar({
+  const cliente = await clienteRepository.criar({
     nome: input.nome.trim(),
     cpf: input.cpf?.trim() ?? '',
     telefone: input.telefone?.trim() ?? '',
     observacoes: input.observacoes?.trim() ?? '',
     honorarioEscritorio: arredondar(input.honorarioEscritorio ?? 0),
   })
+  await historicoService.registrar({
+    entidade: 'Cliente',
+    entidadeId: cliente.id,
+    entidadeLabel: cliente.nome,
+    acao: 'Criado',
+    clienteId: cliente.id,
+    operador,
+  })
+  return cliente
 }
 
 export interface AtualizarClienteInput {
@@ -66,7 +76,7 @@ export interface AtualizarClienteInput {
   honorarioEscritorio?: number
 }
 
-export async function atualizar(id: number, input: AtualizarClienteInput) {
+export async function atualizar(id: number, input: AtualizarClienteInput, operador?: string) {
   await buscarPorId(id)
 
   const data: Prisma.ClienteUpdateInput = {}
@@ -77,5 +87,14 @@ export async function atualizar(id: number, input: AtualizarClienteInput) {
   if (input.status !== undefined) data.status = input.status
   if (input.honorarioEscritorio !== undefined) data.honorarioEscritorio = arredondar(input.honorarioEscritorio)
 
-  return clienteRepository.atualizar(id, data)
+  const cliente = await clienteRepository.atualizar(id, data)
+  await historicoService.registrar({
+    entidade: 'Cliente',
+    entidadeId: cliente.id,
+    entidadeLabel: cliente.nome,
+    acao: 'Editado',
+    clienteId: cliente.id,
+    operador,
+  })
+  return cliente
 }

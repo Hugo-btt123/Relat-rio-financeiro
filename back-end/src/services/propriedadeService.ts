@@ -1,4 +1,5 @@
 import * as propriedadeRepository from '../repositories/propriedadeRepository.js'
+import * as historicoService from './historicoService.js'
 import { NotFoundError } from '../errors/NotFoundError.js'
 import { ValidationError } from '../errors/ValidationError.js'
 import type { Prisma } from '../../generated/prisma/client.js'
@@ -14,15 +15,25 @@ export interface CriarPropriedadeInput {
   documento?: string
 }
 
-export async function criar(clienteId: number, input: CriarPropriedadeInput) {
+export async function criar(clienteId: number, input: CriarPropriedadeInput, operador?: string) {
   if (!input.nome || !input.nome.trim()) {
     throw new ValidationError('Informe um nome para a propriedade/filial.')
   }
-  return propriedadeRepository.criar({
+  const propriedade = await propriedadeRepository.criar({
     nome: input.nome.trim(),
     documento: input.documento?.trim() ?? '',
     cliente: { connect: { id: clienteId } },
   })
+  const { cliente, ...propriedadePublica } = propriedade
+  await historicoService.registrar({
+    entidade: 'Propriedade',
+    entidadeId: propriedade.id,
+    entidadeLabel: `${cliente.nome} — ${propriedade.nome}`,
+    acao: 'Criada',
+    clienteId,
+    operador,
+  })
+  return propriedadePublica
 }
 
 export interface AtualizarPropriedadeInput {
@@ -31,7 +42,7 @@ export interface AtualizarPropriedadeInput {
   status?: string
 }
 
-export async function atualizar(id: number, input: AtualizarPropriedadeInput) {
+export async function atualizar(id: number, input: AtualizarPropriedadeInput, operador?: string) {
   const existente = await propriedadeRepository.buscarPorId(id)
   if (!existente) throw new NotFoundError('Propriedade não encontrada.')
   if (input.nome !== undefined && !input.nome.trim()) {
@@ -43,5 +54,15 @@ export async function atualizar(id: number, input: AtualizarPropriedadeInput) {
   if (input.documento !== undefined) data.documento = input.documento.trim()
   if (input.status !== undefined) data.status = input.status
 
-  return propriedadeRepository.atualizar(id, data)
+  const propriedade = await propriedadeRepository.atualizar(id, data)
+  const { cliente, ...propriedadePublica } = propriedade
+  await historicoService.registrar({
+    entidade: 'Propriedade',
+    entidadeId: propriedade.id,
+    entidadeLabel: `${cliente.nome} — ${propriedade.nome}`,
+    acao: 'Editada',
+    clienteId: propriedade.clienteId,
+    operador,
+  })
+  return propriedadePublica
 }

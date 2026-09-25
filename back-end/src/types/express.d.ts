@@ -6,6 +6,7 @@ declare global {
       usuario?: {
         id: number
         papel: 'administrador' | 'funcionario'
+        nome: string
       }
     }
   }
