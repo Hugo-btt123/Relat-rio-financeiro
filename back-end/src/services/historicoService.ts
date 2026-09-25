@@ -21,3 +21,23 @@ export async function registrar(input: RegistrarHistoricoInput): Promise<void> {
     ...(input.clienteId ? { cliente: { connect: { id: input.clienteId } } } : {}),
   })
 }
+
+export interface ListarHistoricoParams {
+  entidade?: string
+  operador?: string
+}
+
+export async function listar({ entidade = 'todas', operador = '' }: ListarHistoricoParams) {
+  return historicoRepository.listar({
+    ...(entidade !== 'todas' ? { entidade } : {}),
+    ...(operador ? { operador: { contains: operador, mode: 'insensitive' } } : {}),
+  })
+}
+
+export async function listarDaNotinha(notinhaId: number) {
+  return historicoRepository.listarAsc({ entidade: 'Notinha', entidadeId: String(notinhaId) })
+}
+
+export async function listarDoCliente(clienteId: number) {
+  return historicoRepository.listarAsc({ clienteId })
+}

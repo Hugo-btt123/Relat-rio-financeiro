@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import * as clienteService from '../services/clienteService.js'
 import * as propriedadeService from '../services/propriedadeService.js'
+import * as historicoService from '../services/historicoService.js'
 import { paraClientePublico, type Papel } from '../dto/cliente/clienteDto.js'
 import { parseId } from '../utils/parseId.js'
 
@@ -90,4 +91,11 @@ export async function criarPropriedade(req: Request, res: Response): Promise<voi
     req.usuario!.nome,
   )
   res.status(201).json(propriedade)
+}
+
+export async function listarHistorico(req: Request, res: Response): Promise<void> {
+  const clienteId = parseId(req.params.id)
+  await clienteService.buscarPorId(clienteId)
+  const historico = await historicoService.listarDoCliente(clienteId)
+  res.json(historico)
 }

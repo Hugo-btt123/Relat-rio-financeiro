@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import * as notinhaService from '../services/notinhaService.js'
+import * as historicoService from '../services/historicoService.js'
 import { paraNotinhaPublica } from '../dto/notinha/notinhaDto.js'
 import { parseId } from '../utils/parseId.js'
 
@@ -109,4 +110,11 @@ export async function confirmarCreditoPix(req: Request, res: Response): Promise<
   const id = parseId(req.params.id)
   const notinha = await notinhaService.confirmarCreditoPix(id, req.usuario!.nome)
   res.json(paraNotinhaPublica(notinha))
+}
+
+export async function listarHistorico(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id)
+  await notinhaService.buscarPorId(id)
+  const historico = await historicoService.listarDaNotinha(id)
+  res.json(historico)
 }

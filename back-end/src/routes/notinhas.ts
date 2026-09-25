@@ -14,3 +14,4 @@ notinhasRouter.post('/:id/pagar-tudo-dinheiro', notinhaController.pagarTotalDinh
 notinhasRouter.post('/:id/pagar-tudo-pix', notinhaController.pagarTotalPix)
 notinhasRouter.post('/:id/pagar-parcial', notinhaController.pagarParcial)
 notinhasRouter.post('/:id/confirmar-credito-pix', notinhaController.confirmarCreditoPix)
+notinhasRouter.get('/:id/historico', notinhaController.listarHistorico)
